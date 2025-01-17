@@ -19,34 +19,124 @@ use PhpCsFixer\Tests\Test\AbstractFixerTestCase;
 /**
  * @internal
  *
- * @covers \PhpCsFixer\Fixer\Whitespace\TypesSpacesFixer
+ * @covers \PhpCsFixer\Fixer\Whitespace\WhitespaceBetweenConstTypeAndNameFixer
  *
  * @extends AbstractFixerTestCase<\PhpCsFixer\Fixer\Whitespace\TypesSpacesFixer>
  *
  */
 final class WhitespaceBetweenConstTypeAndNameFixerTest extends AbstractFixerTestCase
 {
-//    /**
-//     * @dataProvider provideFixCases
-//     */
-//    public function testFix(string $expected, ?string $input = null): void
-//    {
-//        $this->doTest($expected, $input);
-//    }
+    /**
+     * @dataProvider provideFixCases
+     */
+    public function testFix(string $expected, ?string $input = null): void
+    {
+        $this->doTest($expected, $input);
+    }
 
     public static function provideFixCases(): iterable
     {
+//        yield [
+//            '<?php
+//                class Test
+//                {
+//                    public const int FOO = 1;
+//                }
+//            ',
+//            '<?php
+//                class Test
+//                {
+//                    public const int               FOO = 1;
+//                }
+//            ',
+//        ];
+//
+//        yield [
+//            '<?php
+//                class Test
+//                {
+//                    public const string FOO = \'foo\';
+//                }
+//            ',
+//            '<?php
+//                class Test
+//                {
+//                    public const string               FOO = \'foo\';
+//                }
+//            ',
+//        ];
+//
+//        yield [
+//            '<?php
+//                class Test
+//                {
+//                    public const mixed FOO = \'foo\';
+//                }
+//            ',
+//            '<?php
+//                class Test
+//                {
+//                    public const mixed               FOO = \'foo\';
+//                }
+//            ',
+//        ];
+//
+//        yield [
+//            '<?php
+//                class Test
+//                {
+//                    public const array FOO = [];
+//                }
+//            ',
+//            '<?php
+//                class Test
+//                {
+//                    public const array               FOO = [];
+//                }
+//            ',
+//        ];
+//
+//        yield [
+//            '<?php
+//                class Test
+//                {
+//                    public const static FOO = E::Foo;
+//                }
+//            ',
+//            '<?php
+//                class Test
+//                {
+//                    public const static                  FOO = E::Foo;
+//                }
+//            ',
+//        ];
+//
+//        yield [
+//            '<?php
+//                class Test
+//                {
+//                    public const iterable FOO = [];
+//                }
+//            ',
+//            '<?php
+//                class Test
+//                {
+//                    public const iterable                  FOO = [];
+//                }
+//            ',
+//        ];
+
         yield [
             '<?php
                 class Test
                 {
-                    public const string FOO = 1;
+                    public const string|null FOO = null;
                 }
             ',
             '<?php
                 class Test
                 {
-                    public const string               FOO = 1;
+                    public const string|null            FOO = null;
                 }
             ',
         ];

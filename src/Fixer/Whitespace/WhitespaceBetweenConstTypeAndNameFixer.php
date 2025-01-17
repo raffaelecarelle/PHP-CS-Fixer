@@ -42,7 +42,7 @@ final class WhitespaceBetweenConstTypeAndNameFixer extends AbstractFixer
             'A single space should be between constant type and constant name.',
             [
                 new CodeSample(
-                    "<?php\nclass Example\n{\npublic const string FOO = 1;\n}\n"
+                    "<?php\nclass Example\n{\npublic const string      FOO = 1;\n}\n"
                 ),
             ]
         );
@@ -58,23 +58,49 @@ final class WhitespaceBetweenConstTypeAndNameFixer extends AbstractFixer
 
     public function isCandidate(Tokens $tokens): bool
     {
-        return $tokens->isAnyTokenKindsFound([T_CONST]);
+        return PHP_VERSION_ID >= 80300 && $tokens->isTokenKindFound(T_CONST);
     }
 
     protected function applyFix(\SplFileInfo $file, Tokens $tokens): void
     {
         $tokenCount = $tokens->count() - 1;
 
-//        dump($tokens);
-//        dump($tokens->getNextTokenOfKind(T_CONST));
-//        dump($tokens->getPrevTokenOfKind(T_CONST));
-
-//        $tokens
         for ($index = 0; $index < $tokenCount; ++$index) {
-            if($tokens[$index]->isGivenKind(T_CONST)) {
-                $nextTokenIndex = $tokens->getNextMeaningfulToken($index);
-                dump($tokens[$nextTokenIndex]);
-                $tokenCount += $this->fixSpacing($tokens, $index);
+            if ($tokens[$index]->isGivenKind(T_CONST)) {
+                // Type hint?
+                $typehintIdex = $tokens->getNextMeaningfulToken($index);
+
+                if ($tokens[$typehintIdex]->isGivenKind(CT::T_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS_OPEN)) {
+                    $typehintIdex++;
+                    while ($tokens[$typehintIdex]->isGivenKind(CT::T_DISJUNCTIVE_NORMAL_FORM_TYPE_PARENTHESIS_CLOSE)) {
+                        $typehintIdex += 1;
+                    }
+
+                    if ($tokens[$typehintIdex]->isGivenKind(CT::T_TYPE_ALTERNATION)) {
+                        $typehintIdex++;
+                        while ($tokens[$typehintIdex]->isGivenKind(CT::T_TYPE_ALTERNATION)) {
+                            $typehintIdex += 1;
+                        }
+                    }
+                }
+
+                // const name?
+                $constNameIndex = $tokens->getNextMeaningfulToken($typehintIdex);
+
+                while (
+                    (isset($tokens[$constNameIndex]) && $tokens[$constNameIndex]->isGivenKind(CT::T_TYPE_ALTERNATION)) &&
+                    (isset($tokens[$constNameIndex]) && $tokens[$constNameIndex]->isGivenKind(CT::T_TYPE_INTERSECTION))
+                ) {
+                    dump('aaaaaa');
+                    dump($tokens[$constNameIndex]);
+                    $constNameIndex += 1;
+                }
+
+                if (
+                    (isset($tokens[$typehintIdex]) && $tokens[$typehintIdex]->isGivenKind(T_STRING)) &&
+                    (isset($tokens[$constNameIndex]) && $tokens[$constNameIndex]->isGivenKind(T_STRING))) {
+                    $tokenCount += $this->fixSpacing($tokens, $typehintIdex);
+                }
             }
         }
     }
